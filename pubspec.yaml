@@ -1,10 +1,9 @@
 name: sails_io
-description: A starting point for Dart libraries or applications.
 version: 0.0.1
 homepage: https://github.com/sailscastshq/sails_io
-
+description: Dart/Flutter Websocket Client SDK for communication with Sails from a mobile application.
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.13.0 <3.0.0"
 
 dependencies:
   socket_io_client: ^1.0.1

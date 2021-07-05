@@ -1,12 +1,20 @@
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 
+typedef Json = Map<String, dynamic>;
+typedef JWRCallBack = void Function(Json body, JWR jwr);
+
 class SailsIOClient {
   late socket_io.Socket socket;
+  Json? headers;
+
   SailsIOClient(socket_io.Socket socketIOClient) {
     socket = socketIOClient;
   }
 
-  void _emitFrom(socket_io.Socket socket, Map<String, dynamic> requestCtx) {
+  // Set global headers for the SailsIOClient instance
+  set setHeaders(Json? value) => headers = value;
+
+  void _emitFrom(socket_io.Socket socket, Json requestCtx) {
     JWRCallBack cb = requestCtx['cb'];
 
     requestCtx.remove('cb');
@@ -28,6 +36,12 @@ class SailsIOClient {
       options.params = options.data;
       options.data = null;
     }
+
+    // Merge global headers in, if there are any
+    if (headers != null && headers!.isNotEmpty) {
+      options.headers = {...options.headers!, ...headers!};
+    }
+
     var requestCtx = <String, dynamic>{
       'method': (options.method ?? 'get').toLowerCase(),
       'headers': options.headers,
@@ -38,61 +52,68 @@ class SailsIOClient {
     _emitFrom(socket, requestCtx);
   }
 
-  void get({required String url, Map<String, dynamic>? data, JWRCallBack? cb}) {
+  void get({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
-          {'method': 'get', 'url': url, 'params': data ?? {}},
+          {'method': 'get', 'url': url, 'headers': headers, 'params': data},
         ),
         cb!);
   }
 
-  void post(
-      {required String url, Map<String, dynamic>? data, JWRCallBack? cb}) {
+  void post({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
-          {'method': 'post', 'url': url, 'params': data ?? {}},
+          {'method': 'post', 'url': url, 'headers': headers, 'params': data},
         ),
         cb!);
   }
 
-  void put({required String url, Map<String, dynamic>? data, JWRCallBack? cb}) {
+  void put({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
-          {'method': 'put', 'url': url, 'params': data ?? {}},
+          {
+            'method': 'put',
+            'url': url,
+            'headers': headers,
+            'params': data,
+          },
         ),
         cb!);
   }
 
   void patch(
-      {required String url, Map<String, dynamic>? data, JWRCallBack? cb}) {
+      {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
-          {'method': 'put', 'url': url, 'params': data ?? {}},
+          {
+            'method': 'patch',
+            'url': url,
+            'headers': headers,
+            'params': data,
+          },
         ),
         cb!);
   }
 
   void delete(
-      {required String url, Map<String, dynamic>? data, JWRCallBack? cb}) {
+      {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
-          {'method': 'delete', 'url': url, 'params': data ?? {}},
+          {'method': 'delete', 'url': url, 'headers': headers, 'params': data},
         ),
         cb!);
   }
 }
 
-typedef JWRCallBack = void Function(Map<String, dynamic> body, JWR jwr);
-
 class RequestOptions {
   String? url;
-  Map<dynamic, dynamic>? params;
-  Map<dynamic, dynamic>? data;
-  Map<dynamic, dynamic>? headers;
+  Json? params;
+  Json? data;
+  Json? headers;
   String? method;
 
   RequestOptions({url, params, data, headers, method});
-  RequestOptions.fromJSON(Map<String, dynamic> payload) {
+  RequestOptions.fromJSON(Json payload) {
     url = payload['url'];
     params = payload['params'];
     headers = payload['headers'];
@@ -104,7 +125,7 @@ class JWR {
   dynamic body;
   dynamic headers;
   int? statusCode;
-  JWR.fromJSON(Map<String, dynamic> responseCtx) {
+  JWR.fromJSON(Json responseCtx) {
     body = responseCtx['body'];
     headers = responseCtx['headers'] ?? {};
     statusCode = responseCtx['statusCode'] ?? 200;

@@ -1,4 +1,4 @@
-Dart/Flutter Client SDK for communication with Sails from a mobile application(or any client running Dart or Flutter)
+Dart/Flutter Websocket Client SDK for communication with Sails from a mobile application(or any client running Dart or Flutter)
 
 
 
@@ -12,7 +12,7 @@ import 'package:socket_io_client/socket_io_client.dart' as socket_io_client;
 
 void main() {
   var io = SailsIOClient(socket_io_client.io(
-      'http://example_websocket_url.com',
+      'http://example_websocket_url.com?__sails_io_sdk_version=0.11.0',
       socket_io_client.OptionBuilder().setTransports(['websocket']).build()));
 
   io.socket.onConnect((_) {
@@ -34,7 +34,18 @@ void main() {
       });
 }
 ```
+## The __sails_io_sdk_version query string
+Currently, the Sails websocket server expects that the socket client connecting with it is >= 0.11.0 or it will default to a version of 0.9.0.
 
+To override this notice we are passing the query string to the URL when connecting like so
+
+```dart
+ var io = SailsIOClient(socket_io_client.io(
+      'http://example_websocket_url.com?__sails_io_sdk_version=0.11.0',
+      socket_io_client.OptionBuilder().setTransports(['websocket']).build()));
+```
+
+Do note that this is important because even if your socket connects without the string, trying to listen or use the virtual requests i.e `io.post` or `io.get` will result in an error on your Sails server saying the version of the SDK is incompatible
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
