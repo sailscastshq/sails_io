@@ -27,6 +27,7 @@ class SailsIOClient {
     });
   }
 
+  /// Simulate an HTTP request to sails
   void request(RequestOptions options, JWRCallBack? cb) {
     options.headers = options.headers ?? {};
 
@@ -50,14 +51,16 @@ class SailsIOClient {
     _emitFrom(socket, requestCtx);
   }
 
+  /// Simulate a GET request to sails
   void get({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
           {'method': 'get', 'url': url, 'headers': headers, 'params': data},
         ),
-        cb!);
+        cb);
   }
 
+  /// Simulate a POST request to sails
   void post({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
@@ -66,6 +69,7 @@ class SailsIOClient {
         cb);
   }
 
+  /// Simulate a PUT request to sails
   void put({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
         RequestOptions.fromJSON(
@@ -79,6 +83,7 @@ class SailsIOClient {
         cb);
   }
 
+  /// Simulate a PATCH request to sails
   void patch(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
@@ -93,6 +98,7 @@ class SailsIOClient {
         cb);
   }
 
+  /// Simulate a DELETE request to sails
   void delete(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
