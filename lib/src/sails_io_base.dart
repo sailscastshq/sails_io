@@ -11,18 +11,15 @@ class SailsIOClient {
     socket = socketIOClient;
   }
 
-  // Set global headers for the SailsIOClient instance
-  set setHeaders(Json? value) => headers = value;
+  /// Set global headers for the SailsIOClient instance
+  set setHeaders(Json value) => headers = value;
 
-  void _emitFrom(socket_io.Socket socket, Json requestCtx) {
-    JWRCallBack? cb = requestCtx.remove('cb');
-
-    String sailsEndpoint = requestCtx['method'];
-
-    socket.emitWithAck(sailsEndpoint, requestCtx, ack: (Json responseCtx) {
+  void _emitFrom(socket_io.Socket socket, Json requestContext) {
+    JWRCallBack? cb = requestContext.remove('cb');
+    socket.emitWithAck(requestContext['method'], requestContext,
+        ack: (Json responseContext) {
       if (cb != null) {
-        cb(responseCtx['body'], JWR.fromJSON(responseCtx));
-        requestCtx['calledCb'] = true;
+        cb(responseContext['body'], JWR.fromJSON(responseContext));
       }
     });
   }
@@ -30,7 +27,6 @@ class SailsIOClient {
   /// Simulate an HTTP request to sails
   void request(RequestOptions options, JWRCallBack? cb) {
     options.headers = options.headers ?? {};
-
     if (options.data != null && options.params != null) {
       options.params = options.data;
       options.data = null;
@@ -41,14 +37,14 @@ class SailsIOClient {
       options.headers = {...options.headers!, ...headers!};
     }
 
-    var requestCtx = <String, dynamic>{
+    var requestContext = <String, dynamic>{
       'method': (options.method ?? 'get').toLowerCase(),
       'headers': options.headers,
       'data': options.params ?? options.data ?? {},
       'url': options.url?.trim(),
       'cb': cb
     };
-    _emitFrom(socket, requestCtx);
+    _emitFrom(socket, requestContext);
   }
 
   /// Simulate a GET request to sails
@@ -117,6 +113,7 @@ class RequestOptions {
   String? method;
 
   RequestOptions({url, params, data, headers, method});
+
   RequestOptions.fromJSON(Json payload) {
     url = payload['url'];
     params = payload['params'];
@@ -127,19 +124,20 @@ class RequestOptions {
 
 class JWR {
   dynamic body;
-  dynamic headers;
-  int? statusCode;
-  JWR.fromJSON(Json responseCtx) {
-    body = responseCtx['body'];
-    headers = responseCtx['headers'] ?? {};
-    statusCode = responseCtx['statusCode'] ?? 200;
+  Json? headers;
+  late int statusCode;
+  JWR.fromJSON(Json responseContext) {
+    body = responseContext['body'];
+    headers = responseContext['headers'] ?? {};
+    statusCode = responseContext['statusCode'] ?? 200;
   }
+
   @override
   String toString() {
     return '[ResponseFromSails] -- Status: $statusCode -- Headers $headers -- Body $body ';
   }
 
-  Map<String, dynamic> toJSON() {
+  Json toJson() {
     var data = <String, dynamic>{};
     data['body'] = body;
     data['headers'] = headers;

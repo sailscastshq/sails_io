@@ -21,6 +21,6 @@ void main() {
       },
       cb: (body, jwrResponse) {
         print(body);
-        print(jwrResponse.toJSON());
+        print(jwrResponse.toJson());
       });
 }
