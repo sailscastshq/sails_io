@@ -1,7 +1,7 @@
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 
 typedef Json = Map<String, dynamic>;
-typedef JWRCallBack = void Function(Json body, JWR jwr);
+typedef JWRCallBack = void Function(dynamic body, JWR jwr);
 
 class SailsIOClient {
   late socket_io.Socket socket;
@@ -15,21 +15,19 @@ class SailsIOClient {
   set setHeaders(Json? value) => headers = value;
 
   void _emitFrom(socket_io.Socket socket, Json requestCtx) {
-    JWRCallBack cb = requestCtx['cb'];
+    JWRCallBack? cb = requestCtx.remove('cb');
 
-    requestCtx.remove('cb');
     String sailsEndpoint = requestCtx['method'];
 
     socket.emitWithAck(sailsEndpoint, requestCtx, ack: (dynamic responseCtx) {
-      // ignore: unnecessary_null_comparison
-      if (cb != null && requestCtx['calledCb'] != null) {
+      if (cb != null) {
         cb(responseCtx['body'], JWR.fromJSON(responseCtx));
         requestCtx['calledCb'] = true;
       }
     });
   }
 
-  void request(RequestOptions options, JWRCallBack cb) {
+  void request(RequestOptions options, JWRCallBack? cb) {
     options.headers = options.headers ?? {};
 
     if (options.data != null && options.params != null) {
@@ -65,7 +63,7 @@ class SailsIOClient {
         RequestOptions.fromJSON(
           {'method': 'post', 'url': url, 'headers': headers, 'params': data},
         ),
-        cb!);
+        cb);
   }
 
   void put({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
@@ -78,7 +76,7 @@ class SailsIOClient {
             'params': data,
           },
         ),
-        cb!);
+        cb);
   }
 
   void patch(
@@ -92,7 +90,7 @@ class SailsIOClient {
             'params': data,
           },
         ),
-        cb!);
+        cb);
   }
 
   void delete(
@@ -101,7 +99,7 @@ class SailsIOClient {
         RequestOptions.fromJSON(
           {'method': 'delete', 'url': url, 'headers': headers, 'params': data},
         ),
-        cb!);
+        cb);
   }
 }
 
