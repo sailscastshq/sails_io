@@ -19,7 +19,7 @@ class SailsIOClient {
 
     String sailsEndpoint = requestCtx['method'];
 
-    socket.emitWithAck(sailsEndpoint, requestCtx, ack: (dynamic responseCtx) {
+    socket.emitWithAck(sailsEndpoint, requestCtx, ack: (Json responseCtx) {
       if (cb != null) {
         cb(responseCtx['body'], JWR.fromJSON(responseCtx));
         requestCtx['calledCb'] = true;
