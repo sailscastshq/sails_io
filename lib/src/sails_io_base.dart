@@ -43,7 +43,7 @@ class SailsIOClient {
 
   /// Simulate a GET request to sails
   void get({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
-    return request(
+    request(
         RequestOptions.fromJson(
           {'method': 'get', 'url': url, 'headers': headers, 'params': data},
         ),
@@ -52,7 +52,7 @@ class SailsIOClient {
 
   /// Simulate a POST request to sails
   void post({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
-    return request(
+    request(
         RequestOptions.fromJson(
           {'method': 'post', 'url': url, 'headers': headers, 'params': data},
         ),
@@ -61,7 +61,7 @@ class SailsIOClient {
 
   /// Simulate a PUT request to sails
   void put({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
-    return request(
+    request(
         RequestOptions.fromJson(
           {
             'method': 'put',
@@ -76,7 +76,7 @@ class SailsIOClient {
   /// Simulate a PATCH request to sails
   void patch(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
-    return request(
+    request(
         RequestOptions.fromJson(
           {
             'method': 'patch',
@@ -91,7 +91,7 @@ class SailsIOClient {
   /// Simulate a DELETE request to sails
   void delete(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
-    return request(
+    request(
         RequestOptions.fromJson(
           {'method': 'delete', 'url': url, 'headers': headers, 'params': data},
         ),
