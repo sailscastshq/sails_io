@@ -4,8 +4,8 @@ typedef Json = Map<String, dynamic>;
 typedef JWRCallBack = void Function(dynamic body, JWR jwr);
 
 class SailsIOClient {
-  late socket_io.Socket socket;
-  Json? headers;
+  late final socket_io.Socket socket;
+  Json headers = {};
 
   SailsIOClient(socket_io.Socket socketIOClient) {
     socket = socketIOClient;
@@ -19,29 +19,23 @@ class SailsIOClient {
     socket.emitWithAck(requestContext['method'], requestContext,
         ack: (Json responseContext) {
       if (cb != null) {
-        cb(responseContext['body'], JWR.fromJSON(responseContext));
+        cb(responseContext['body'], JWR.fromJson(responseContext));
       }
     });
   }
 
   /// Simulate an HTTP request to sails
   void request(RequestOptions options, JWRCallBack? cb) {
-    options.headers = options.headers ?? {};
-    if (options.data != null && options.params != null) {
-      options.params = options.data;
-      options.data = null;
-    }
-
+    options.headers = options.headers;
     // Merge global headers in, if there are any
-    if (headers != null && headers!.isNotEmpty) {
-      options.headers = {...options.headers!, ...headers!};
-    }
+
+    options.headers = {...options.headers, ...headers};
 
     var requestContext = <String, dynamic>{
-      'method': (options.method ?? 'get').toLowerCase(),
+      'method': options.method.toLowerCase(),
       'headers': options.headers,
-      'data': options.params ?? options.data ?? {},
-      'url': options.url?.trim(),
+      'data': options.params,
+      'url': options.url.trim(),
       'cb': cb
     };
     _emitFrom(socket, requestContext);
@@ -50,7 +44,7 @@ class SailsIOClient {
   /// Simulate a GET request to sails
   void get({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
-        RequestOptions.fromJSON(
+        RequestOptions.fromJson(
           {'method': 'get', 'url': url, 'headers': headers, 'params': data},
         ),
         cb);
@@ -59,7 +53,7 @@ class SailsIOClient {
   /// Simulate a POST request to sails
   void post({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
-        RequestOptions.fromJSON(
+        RequestOptions.fromJson(
           {'method': 'post', 'url': url, 'headers': headers, 'params': data},
         ),
         cb);
@@ -68,7 +62,7 @@ class SailsIOClient {
   /// Simulate a PUT request to sails
   void put({required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
-        RequestOptions.fromJSON(
+        RequestOptions.fromJson(
           {
             'method': 'put',
             'url': url,
@@ -83,7 +77,7 @@ class SailsIOClient {
   void patch(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
-        RequestOptions.fromJSON(
+        RequestOptions.fromJson(
           {
             'method': 'patch',
             'url': url,
@@ -98,7 +92,7 @@ class SailsIOClient {
   void delete(
       {required String url, Json? headers, Json? data, JWRCallBack? cb}) {
     return request(
-        RequestOptions.fromJSON(
+        RequestOptions.fromJson(
           {'method': 'delete', 'url': url, 'headers': headers, 'params': data},
         ),
         cb);
@@ -106,27 +100,36 @@ class SailsIOClient {
 }
 
 class RequestOptions {
-  String? url;
-  Json? params;
-  Json? data;
-  Json? headers;
-  String? method;
+  String url = '';
+  Json params = {};
+  Json headers = {};
+  String method = 'get';
 
-  RequestOptions({url, params, data, headers, method});
+  RequestOptions({required url, params, data, headers, method});
 
-  RequestOptions.fromJSON(Json payload) {
+  RequestOptions.fromJson(Json payload) {
+    assert(payload['url'] != null);
     url = payload['url'];
-    params = payload['params'];
-    headers = payload['headers'];
-    method = payload['method'];
+    if (payload['params'] != null) {
+      params = payload['params'];
+    }
+    if (payload['headers'] != null) {
+      headers = payload['headers'];
+    }
+    if (payload['method'] != null) {
+      method = payload['method'];
+    }
   }
 }
 
 class JWR {
   dynamic body;
-  Json? headers;
-  late int statusCode;
-  JWR.fromJSON(Json responseContext) {
+  Json headers = {};
+  int statusCode = 200;
+
+  JWR({body, headers, statusCode});
+
+  JWR.fromJson(Json responseContext) {
     body = responseContext['body'];
     headers = responseContext['headers'] ?? {};
     statusCode = responseContext['statusCode'] ?? 200;
