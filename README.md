@@ -19,7 +19,19 @@ void main() {
     print('Connected');
   });
 
-  io.socket.on('user', (message) {});
+  // Subscribe to updates of user entity creating a get action:
+  // https://sailsjs.com/documentation/reference/web-sockets/resourceful-pub-sub/subscribe
+  io.get(
+      url: "http://example_websocket_url.com/user-subs",
+      cb: (body, jwrResponse) {
+        print(body);
+        print(jwrResponse.toJson());
+      });
+      
+  io.socket.on('user', (message) {
+    // You'll get events on publish
+    // https://sailsjs.com/documentation/reference/web-sockets/resourceful-pub-sub/publish
+  });
   io.socket.onDisconnect((_) => print('disconnected'));
 
   io.post(
